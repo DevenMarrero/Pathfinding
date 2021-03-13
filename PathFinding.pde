@@ -14,6 +14,8 @@ Node[][] grid;
 int nodeSize = 15;
 boolean dragStart = false;
 boolean dragFinish = false;
+int lastRow;
+int lastCol;
 
 
 // Colours
@@ -48,23 +50,40 @@ void handleEvents(){
   int row = mouseY / nodeSize;
   int col = mouseX / nodeSize;
   
-  int lastRow = 0;
-  int lastCol = 0;
-  
-  // Left click
+  // Left click - -
   if (mousePressed && mouseButton == LEFT){
     
     // Dragging start
     if (dragStart == true){
-      grid[row][col].set_start();
+      grid[lastRow][lastCol].set_empty();
+      
+      // Node is empty
+      if (grid[row][col].is_empty()){
+        grid[row][col].set_start();
+        
+        lastRow = row;
+        lastCol = col;
+      }
+      // If not go back
+      else grid[lastRow][lastCol].set_start();
     }
     
     // Dragging finish
     else if (dragFinish == true){
-      grid[row][col].set_start();
+      grid[lastRow][lastCol].set_empty();
+      
+      // Node is empty
+      if(grid[row][col].is_empty()){
+        grid[row][col].set_finish();
+      
+        lastRow = row;
+        lastCol = col;
+      }
+      // If not go back
+      else grid[lastRow][lastCol].set_start();
     }
     
-    // Empty node -> wall
+    // Empty node 
     else if (grid[row][col].is_empty()) {
       grid[row][col].set_wall();
     }
@@ -72,17 +91,19 @@ void handleEvents(){
     // Start node
     else if (grid[row][col].is_start()) {
       dragStart = true;
-      grid[row][col].set_empty();
+      lastRow = row;
+      lastCol = col;
     }
     
     // Finish node
     else if (grid[row][col].is_finish()) {
       dragFinish = true;
-      grid[row][col].set_empty();
+      lastRow = row;
+      lastCol = col;
     }
   }
   
-  // Right click
+  // Right click - -
   else if (mousePressed && mouseButton == RIGHT){
     // Empty node
     if (grid[row][col].is_wall()){
@@ -98,7 +119,7 @@ void handleEvents(){
 }
 
 
-// Handles updates between frames - - - - - - - - - - - -
+// Update the gameState- - - - - - - - - - - -
 void update(){
   
 }
