@@ -5,7 +5,7 @@
 //  Description: Visualization tool for testing diferent pathfinding algorithms 
 //  Created by: Deven
 //  Created on: March 12th, 2021
-//  Last Updated: March 12th, 2021
+//  Last Updated: March 13th, 2021
 //  Known Limitations: 
 
 
@@ -37,6 +37,7 @@ void setup(){
   // Allows the screen to be resized
   surface.setResizable(true);
   surface.setSize(nodeSize * grid.length, nodeSize * grid[0].length);
+  algorithm = new Algorithms();
 }
 
 void draw(){
@@ -50,6 +51,12 @@ void handleEvents(){
   int row = mouseY / nodeSize;
   int col = mouseX / nodeSize;
   
+  // Mouse off screen
+  if(row < 0) row = 0;
+  if(row > grid.length - 1) row = grid.length - 1;
+  if(col < 0) col = 0;
+  if(col > grid[row].length - 1) col = grid[row].length - 1;
+
   // Left click - -
   if (mousePressed && mouseButton == LEFT){
     
@@ -57,8 +64,9 @@ void handleEvents(){
     if (dragStart == true){
       grid[lastRow][lastCol].set_empty();
       
-      // Node is empty
-      if (grid[row][col].is_empty()){
+      // Node is empty  
+      // Row not out of range || col not out of range || node is empty
+      if (grid[row][col].is_empty( )){
         grid[row][col].set_start();
         
         lastRow = row;
@@ -80,7 +88,7 @@ void handleEvents(){
         lastCol = col;
       }
       // If not go back
-      else grid[lastRow][lastCol].set_start();
+      else grid[lastRow][lastCol].set_finish();
     }
     
     // Empty node 
@@ -137,7 +145,6 @@ void render(){
 }
 
 
-
 // Clears the entire grid
 void clear_grid(){
   // Empty old grid
@@ -146,7 +153,7 @@ void clear_grid(){
   // Fill Grid
   for (int r = 0; r < grid.length; r++){
     for (int c = 0; c < grid[r].length; c++){
-      grid[r][c] = new Node();
+      grid[r][c] = new Node(r, c);
     }
   }
   // Place start and finish nodes
