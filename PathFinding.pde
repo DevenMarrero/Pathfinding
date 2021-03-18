@@ -5,7 +5,7 @@
 //  Description: Visualization tool for testing diferent pathfinding algorithms 
 //  Created by: Deven
 //  Created on: March 12th, 2021
-//  Last Updated: March 13th, 2021
+//  Last Updated: March 17th, 2021
 //  Known Limitations: 
 
 
@@ -14,8 +14,12 @@ Node[][] grid;
 int nodeSize = 15;
 boolean dragStart = false;
 boolean dragFinish = false;
+boolean erasing  = false;
+boolean drawing = false;
 int lastRow;
 int lastCol;
+
+Algorithms algorithm;
 
 
 // Colours
@@ -37,6 +41,8 @@ void setup(){
   // Allows the screen to be resized
   surface.setResizable(true);
   surface.setSize(nodeSize * grid.length, nodeSize * grid[0].length);
+  
+  // create object that contains algorithms.
   algorithm = new Algorithms();
 }
 
@@ -60,12 +66,11 @@ void handleEvents(){
   // Left click - -
   if (mousePressed && mouseButton == LEFT){
     
-    // Dragging start
-    if (dragStart == true){
+    // Dragging start -
+    if (dragStart){
       grid[lastRow][lastCol].set_empty();
       
       // Node is empty  
-      // Row not out of range || col not out of range || node is empty
       if (grid[row][col].is_empty( )){
         grid[row][col].set_start();
         
@@ -76,8 +81,8 @@ void handleEvents(){
       else grid[lastRow][lastCol].set_start();
     }
     
-    // Dragging finish
-    else if (dragFinish == true){
+    // Dragging finish - 
+    else if (dragFinish){
       grid[lastRow][lastCol].set_empty();
       
       // Node is empty
@@ -91,9 +96,22 @@ void handleEvents(){
       else grid[lastRow][lastCol].set_finish();
     }
     
+    // Erasing -
+    else if (erasing && !drawing){
+      if (grid[row][col].is_wall( )){
+        grid[row][col].set_empty();
+      }
+    }
+    
     // Empty node 
     else if (grid[row][col].is_empty()) {
       grid[row][col].set_wall();
+      drawing = true;
+    }
+    
+    // Wall node
+    else if (grid[row][col].is_wall()){
+      erasing = true;
     }
     
     // Start node
@@ -119,10 +137,13 @@ void handleEvents(){
     }
   }
   
-  // Stop dragging
+  // No click - -
   else {
     dragStart = false;
     dragFinish = false;
+    erasing = false;
+    drawing  = false;
+    
   }
 }
 
