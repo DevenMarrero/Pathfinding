@@ -1,4 +1,8 @@
 class Node {
+  public int f;
+  public int g;
+  public int h;
+  
   private color colour;
   private int row;
   private int col;
@@ -8,6 +12,9 @@ class Node {
     colour = WHITE;
     this.row = row;
     this.col = col;
+    f = 0;
+    g = 0;
+    h = 0;
   }
 
   // Get state
@@ -34,6 +41,7 @@ class Node {
   
   // Returns all traversable nodes connected to row, col
   ArrayList<Node> get_neighbours(Node[][] field, boolean diagonal){
+    
     ArrayList<Node> neighbours = new ArrayList<Node>();
     
     // UP
