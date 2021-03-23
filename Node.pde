@@ -1,4 +1,17 @@
 class Node implements Comparable<Node>{
+  /* 
+  Class that makes up each square of the grid, can set/get states and return all nodes it is connected to
+  */
+  
+  // Colours
+  color RED = color(255, 0, 0);          // Finish
+  color GREEN = color(0, 225, 0);        // Start
+  color BLUE = color(0, 0, 255);         //
+  color WHITE = color(255, 255, 255);    // Empty
+  color PURPLE = color(234, 166, 247);   // Open
+  color ORANGE = color(255, 165, 0);     // Path
+  color GREY = color(128, 128, 128);     // Wall
+  color TURQUOISE = color(152, 237, 230);// Closed
   
   float f; // g + h
   float g; // Distance travelled so far
@@ -46,7 +59,7 @@ class Node implements Comparable<Node>{
   }
 
 
-  // Returns all traversable nodes connected to row, col
+  // Returns all traversable nodes connected to row, col - - -
   ArrayList<Node> get_neighbours(Node[][] field, boolean canMoveDiagonal){
     
     ArrayList<Node> neighbours = new ArrayList<Node>();
@@ -106,9 +119,9 @@ class Node implements Comparable<Node>{
     return neighbours;
   }
   
-  // Compare two nodes, returns lowest f-Score
+  // Compare two nodes, returns lowest f-Score. Used so PriorityQueue can sort nodes - - -
   @Override
-  public int compareTo(Node node){
+  int compareTo(Node node){
     // Our score is lower
     if (this.f < node.f){
       return -1;
@@ -119,7 +132,7 @@ class Node implements Comparable<Node>{
     }
     // Score is the same
     else {
-      return 0;
+      return -1;
     }
   }
   
