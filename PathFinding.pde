@@ -9,14 +9,8 @@
 //  Known Limitations: 
 
 
-// Visualizer Vars
+// Algorithm Vars
 Algorithms algorithm;
-
-Selector algSelector;
-Selector heurSelector;
-
-SelectorButton diagonalButton; 
-
 
 Node[][] grid;
 ArrayList<Node> walls = new ArrayList<Node>(); // Keep track of walls when clearing grid
@@ -32,16 +26,14 @@ boolean drawing = false;
 int lastRow;
 int lastCol;
 
+// Menu vars
+Selector algSelector;
+Selector heurSelector;
+ToggleButton diagonalButton; 
 
-// Colours
-color RED = color(255, 0, 0);          // Finish
-color GREEN = color(0, 225, 0);        // Start
-color BLUE = color(0, 0, 255);         //
-color WHITE = color(255, 255, 255);    // Empty
-color PURPLE = color(234, 166, 247);   // Open
-color ORANGE = color(255, 165, 0);     // Path
-color GREY = color(128, 128, 128);     // Wall
-color TURQUOISE = color(152, 237, 230);// Closed
+rectButton startButton;
+rectButton resetButton;
+rectButton clearButton;
 
 
 void setup(){ 
@@ -63,140 +55,167 @@ void setup(){
   algSelector = new Selector("ALGORITHMS", width - 180, 50, 160, 250); // Title, x, y, w, h
   algSelector.addButton("A*", "a_star");
   
-  heurSelector = new Selector("HEURISTICS", width - 180, 350, 160, 150); // Title, x, y, w, h
+  heurSelector = new Selector("HEURISTICS", width - 180, 350, 160, 140); // Title, x, y, w, h
   heurSelector.addButton("Manhattan", "manhattan");
   heurSelector.addButton("Euclidean", "euclidean");
   heurSelector.addButton("Octile", "octile");
   heurSelector.addButton("Chebyshev", "chebyshev");
   
-  diagonalButton = new SelectorButton("Move Diagonal", "diagonal", width - 160, 550);
+  diagonalButton = new ToggleButton("Move Diagonal", "diagonal", width - 160, 550);
+  
+  startButton = new rectButton("START", 25, width - 150, 685, 100, 40);
+  resetButton = new rectButton("RESET", 20, width - 190, 640, 80, 30);
+  clearButton = new rectButton("CLEAR", 20, width - 90, 640, 80, 30);
   
 }
 
 void draw(){
   background(200, 200, 200);
-  // Not running algorithm
-  if (!algorithm.isRunning){
-    frameRate(100);
-    handleEvents();
-  } 
-  
-  update();
-  render();
+  handleEvents(); // Handle user input and modify grid
+  update(); // Step through algorithm if running
+  render(); // Draw everythiing on screen
 }
 
 // Handles input from user - - - - - - - - - - - - - - -
 void handleEvents(){
-  int row = mouseY / nodeSize;
-  int col = mouseX / nodeSize;
+  // Alg is not running
+  if (!algorithm.isRunning){
+    frameRate(200);
+    int row = mouseY / nodeSize;
+    int col = mouseX / nodeSize;
+    
+    boolean offGrid = false;
+    
+    // Mouse is off grid
+    if(row < 0 || row > grid.length - 1 || col < 0 || col > grid[row].length - 1) offGrid = true;
   
-  boolean offGrid = false;
-  
-  // Mouse is off grid
-  if(row < 0 || row > grid.length - 1 || col < 0 || col > grid[row].length - 1) offGrid = true;
-
-  // Left click - -
-  if (mousePressed && mouseButton == LEFT){
-    if (!offGrid){
-      // Dragging start -
-      if (dragStart){
-        grid[lastRow][lastCol].set_empty();
-        
-        // Node is empty  
-        if (!grid[row][col].is_finish() && !grid[row][col].is_wall()){
-          grid[row][col].set_start();
-          start = grid[row][col];
+    // Left click - -
+    if (mousePressed && mouseButton == LEFT){
+      if (!offGrid){
+        // Dragging start -
+        if (dragStart){
+          grid[lastRow][lastCol].set_empty();
           
+          // Node is empty  
+          if (!grid[row][col].is_finish() && !grid[row][col].is_wall()){
+            grid[row][col].set_start();
+            start = grid[row][col];
+            
+            lastRow = row;
+            lastCol = col;
+          }
+          // If not go back
+          else {
+            grid[lastRow][lastCol].set_start();
+            start = grid[lastRow][lastCol];
+          }
+        }
+        
+        // Dragging finish - 
+        else if (dragFinish){
+          grid[lastRow][lastCol].set_empty();
+          
+          // Node is empty
+          if(!grid[row][col].is_start() && !grid[row][col].is_wall()){
+            grid[row][col].set_finish();
+            goal = grid[row][col];
+          
+            lastRow = row;
+            lastCol = col;
+          }
+          // If not go back
+          else {
+            grid[lastRow][lastCol].set_finish();
+            goal = grid[lastRow][lastCol];
+          }
+        }
+        
+        // Erasing -
+        else if (erasing && !drawing){
+          if (grid[row][col].is_wall( )){
+            grid[row][col].set_empty();
+          }
+        }
+        
+        // Empty node
+        else if (!grid[row][col].is_start() && !grid[row][col].is_finish() && !grid[row][col].is_wall()) {
+          grid[row][col].set_wall();
+          drawing = true;
+          
+        }
+        
+        // Wall node
+        else if (grid[row][col].is_wall()){
+          erasing = true;
+        }
+        
+        // Start node
+        else if (grid[row][col].is_start()) {
+          dragStart = true;
           lastRow = row;
           lastCol = col;
         }
-        // If not go back
-        else {
-          grid[lastRow][lastCol].set_start();
-          start = grid[lastRow][lastCol];
-        }
-      }
-      
-      // Dragging finish - 
-      else if (dragFinish){
-        grid[lastRow][lastCol].set_empty();
         
-        // Node is empty
-        if(!grid[row][col].is_start() && !grid[row][col].is_wall()){
-          grid[row][col].set_finish();
-          goal = grid[row][col];
-        
+        // Finish node
+        else if (grid[row][col].is_finish()) {
+          dragFinish = true;
           lastRow = row;
           lastCol = col;
         }
-        // If not go back
-        else {
-          grid[lastRow][lastCol].set_finish();
-          goal = grid[lastRow][lastCol];
-        }
       }
-      
-      // Erasing -
-      else if (erasing && !drawing){
-        if (grid[row][col].is_wall( )){
+    }
+    
+    // Right click - -
+    else if (mousePressed && mouseButton == RIGHT){
+      if (!offGrid){
+        // Empty node
+        if (grid[row][col].is_wall()){
           grid[row][col].set_empty();
         }
       }
-      
-      // Empty node
-      else if (!grid[row][col].is_start() && !grid[row][col].is_finish() && !grid[row][col].is_wall()) {
-        grid[row][col].set_wall();
-        drawing = true;
-        
-      }
-      
-      // Wall node
-      else if (grid[row][col].is_wall()){
-        erasing = true;
-      }
-      
-      // Start node
-      else if (grid[row][col].is_start()) {
-        dragStart = true;
-        lastRow = row;
-        lastCol = col;
-      }
-      
-      // Finish node
-      else if (grid[row][col].is_finish()) {
-        dragFinish = true;
-        lastRow = row;
-        lastCol = col;
-      }
     }
-  }
-  
-  // Right click - -
-  else if (mousePressed && mouseButton == RIGHT){
-    if (!offGrid){
-      // Empty node
-      if (grid[row][col].is_wall()){
-        grid[row][col].set_empty();
-      }
-    }
-  }
-  
-  // No click - -
-  else {
-    dragStart = false;
-    dragFinish = false;
-    erasing = false;
-    drawing  = false;
     
+    // No click - -
+    else {
+      dragStart = false;
+      dragFinish = false;
+      erasing = false;
+      drawing  = false;
+    }
+  
+    // Selection menus/Buttons - - - -
+    algSelector.handleEvents();
+    heurSelector.handleEvents();
+    
+    if (diagonalButton.isPressed()){
+      if (diagonalButton.isSelected) diagonalButton.isSelected = false;
+      else if (!diagonalButton.isSelected) diagonalButton.isSelected = true;
+    }
+    
+    // Start Pressed
+    if (startButton.isPressed()){
+      clear_path();
+      algorithm.isRunning = true;
+    }
   }
   
-  // Selection menus/Buttons - - - -
-  algSelector.handleEvents();
-  heurSelector.handleEvents();
+  // Algorithm is running
+  else {
+
+  }
   
-  if (diagonalButton.isPressed()){
-    if (diagonalButton.isSelected) diagonalButton.isSelected = false;
-    else if (!diagonalButton.isSelected) diagonalButton.isSelected = true;
+  if (resetButton.isPressed()){
+    algorithm.reset();
+    clear_grid();
+    grid[24][20].set_start();
+    start = grid[24][20];
+    grid[24][30].set_finish();
+    goal = grid[24][30];
+  }
+  
+  if (clearButton.isPressed()){
+    algorithm.reset();
+    clear_path();
   }
   
 }
@@ -208,9 +227,11 @@ void update(){
   algorithm.options.algorithm = algSelector.selection.value;
   algorithm.options.heuristic = heurSelector.selection.value;
   
+  // Set diagonal option
   if(diagonalButton.isSelected) algorithm.options.canMoveDiagonal = true;
   else algorithm.options.canMoveDiagonal = false;
   
+  // Run alg if ready
   if (algorithm.isRunning){
     frameRate(25);
     int result = algorithm.run(grid, start, goal); // -1 = fail, 0 = still running, 1 = found path
@@ -244,6 +265,9 @@ void render(){
   
   // Draw buttons
   diagonalButton.render();
+  startButton.render();
+  resetButton.render();
+  clearButton.render();
   
 }
 
@@ -287,15 +311,5 @@ void clear_path(){
   // Re-add wall nodes
   for (Node wall : walls){
     grid[wall.get_row()][wall.get_col()].set_wall();
-  }
-}
-
-
-
-void keyPressed(){
-  if (key == ' '){
-    //clear_path();
-    clear_path();
-    algorithm.isRunning = true;
   }
 }
