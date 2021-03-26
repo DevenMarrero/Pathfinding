@@ -1,7 +1,11 @@
-import java.util.PriorityQueue;
-import java.util.Map;
+import java.util.PriorityQueue; // Priority queue so algorithms can run in O(1) time
+import java.util.Map; // HashMap for backtracking with key, value pairs
 
 class Algorithms{
+  /* 
+  Class that holds all algorithms, heuristics, and path rendering functions.
+  Everything in class is designed to be called multiple times within a while loop
+  */
   Options options;
   // Algorithm state vars;
   private boolean isRunning;
@@ -29,25 +33,19 @@ class Algorithms{
     pathReady = false;
   }
   
-  // Algorithms - - - - -
-  int run(Node[][] field, Node start, Node goal){  
-    isRunning = true;
-    
-    switch (options.algorithm){
-      case ("a_star"):
-        return a_star(field, start, goal, options.canMoveDiagonal);
-         
-      default:
-        throw new RuntimeException("Algorithm: " + options.algorithm + " does not exist!");
-    }
+  void reset(){
+    isRunning = false;
+    setupComplete = false;
   }
   
+  
   void reconstruct_path(HashMap<Node,Node> cameFrom, Node current){
+    // Only needs to be called once, backtracks and reverses the order of the nodes in cameFrom
     path.clear();
     path.add(0, current);
     while (cameFrom.containsKey(current)){
       current = cameFrom.get(current);
-      path.add(0, current);
+      path.add(path.size(), current); // Index 0 for start-finish, Index path.size for finish to start
     }
     // remove start and finish nodes
     path.remove(path.size() - 1);
@@ -63,6 +61,20 @@ class Algorithms{
       pathReady = false;
     }
   }
+  
+  // Algorithms - - - - -
+  int run(Node[][] field, Node start, Node goal){  
+    isRunning = true;
+    
+    switch (options.algorithm){
+      case ("a_star"):
+        return a_star(field, start, goal, options.canMoveDiagonal);
+         
+      default:
+        throw new RuntimeException("Algorithm: " + options.algorithm + " does not exist!");
+    }
+  }
+
   
   // A Star - - -
   int a_star(Node[][] field, Node start, Node goal, boolean canMoveDiagonal){
@@ -116,15 +128,25 @@ class Algorithms{
       if (current != start){
         current.set_closed();
       }
+      // Algorithm is still searchiing
       return 0;
     }
     // Failed to find a path
+    isRunning = false;
+    setupComplete = false;
     return -1;
+  }
+  
+  // Breadth-first Search
+  int breadthFS(Node[][] field, Node start, Node goal, boolean canMoveDiagonal){
+    
+    return 1;
   }
   
 
   // Heuristics - - - - -
   float heuristic(Node node, Node goal){
+    // Function will return distance between nodes based on heuristic selected in options.heuristic
     
     // Distance from node to goal
     int dx = abs(node.get_row() - goal.get_row());
@@ -177,6 +199,9 @@ class Algorithms{
     
     // Class for algorithm settings - - - -
     class Options{
+      /* 
+      Groups all algorithm settings in one place for clean and easy access
+      */
       private String algorithm;
       private String heuristic;
       boolean canMoveDiagonal;
