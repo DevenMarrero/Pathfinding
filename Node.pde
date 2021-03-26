@@ -140,7 +140,8 @@ class Node implements Comparable<Node>{
   // Draw Node - - -
   void render(int row, int column){
     fill(colour);
-    stroke(0, 0, 0);
+    stroke(0);
+    strokeWeight(1);
     square(column * nodeSize, row * nodeSize, nodeSize);
   }
   
