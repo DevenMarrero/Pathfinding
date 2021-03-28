@@ -1,4 +1,4 @@
-import java.util.PriorityQueue; // Priority queue so algorithms can run in O(1) time
+import java.util.PriorityQueue; // Priority queue so algorithms can run in O(1) time with automatic sorting
 import java.util.Map; // HashMap for backtracking with key, value pairs
 
 class Algorithms{
@@ -69,6 +69,13 @@ class Algorithms{
     switch (options.algorithm){
       case ("a_star"):
         return a_star(field, start, goal, options.canMoveDiagonal);
+       
+      case("dijkstra"):
+        options.heuristic = "one";
+        return a_star(field, start, goal, options.canMoveDiagonal);
+       
+      case ("breadthFS"):
+        return breadthFS(field, start, goal, options.canMoveDiagonal);
          
       default:
         throw new RuntimeException("Algorithm: " + options.algorithm + " does not exist!");
@@ -76,7 +83,7 @@ class Algorithms{
   }
 
   
-  // A Star - - -
+  // A Star / Dijkstra's - - -
   int a_star(Node[][] field, Node start, Node goal, boolean canMoveDiagonal){
     
     // Setup algorithm once
@@ -139,7 +146,8 @@ class Algorithms{
   
   // Breadth-first Search
   int breadthFS(Node[][] field, Node start, Node goal, boolean canMoveDiagonal){
-    
+    isRunning = false;
+    setupComplete = false;
     return 1;
   }
   
@@ -170,6 +178,9 @@ class Algorithms{
        
       case ("chebyshev"):
        return chebyshev(dx, dy) * (1 + 1500);
+       
+      case ("one"):
+        return 1;
          
       default:
         throw new RuntimeException("Heuristic: " + options.heuristic + " does not exist!");
