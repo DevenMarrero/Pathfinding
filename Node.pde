@@ -84,7 +84,7 @@ class Node implements Comparable<Node>{
     // Diagonals
     if (canMoveDiagonal){
       // Top right
-      if (row - 1 >= 0 && col + 1 != field[row].length - 1 && !field[row - 1][col + 1].is_wall()){
+      if (row - 1 >= 0 && col + 1 != field[row].length && !field[row - 1][col + 1].is_wall()){
         // Not a corner
         if (!(field[row - 1][col].is_wall() && field[row][col + 1].is_wall())){
           neighbours.add(field[row - 1][col + 1]);
