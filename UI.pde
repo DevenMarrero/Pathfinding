@@ -26,7 +26,7 @@ class Selector { // - - - - -
   }
   
   /* Checks if any buttons are pressed/Hovered*/
-  void handleEvents(){
+  void handlePress(){
     // Pressed
     for (ToggleButton button : buttons){
       if (button.is_pressed()){
@@ -37,7 +37,9 @@ class Selector { // - - - - -
       }
     }
     selection.isSelected = true;
+  }
     
+  void handleHover(){
     // Hovered
     for (ToggleButton button : buttons){
       if(button.is_hovered()){
