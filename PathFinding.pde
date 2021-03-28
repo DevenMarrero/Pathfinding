@@ -5,7 +5,7 @@
 //  Description: Visualization tool for testing diferent pathfinding algorithms 
 //  Created by: Deven
 //  Created on: March 12th, 2021
-//  Last Updated: March 21th, 2021
+//  Last Updated: March 27th, 2021
 //  Known Limitations: 
 
 
@@ -58,13 +58,22 @@ void setup(){
   algorithm = new Algorithms();
   
   // Create selection menus and add buttons to them
+  // Algorithm Selector
   algSelector = new Selector("ALGORITHMS", width - 180, 50, 160, 250); // Title, x, y, w, h
-  descText = "";
+  
+  descText = "A* is one of the most popular pathfinding algorithms due to its speed and intelligence. A* uses heuristics to estimate the distance from the purple node it is checking to the goal and then moves to the closest one and repeats.";
   algSelector.addButton("A*", descText, "a_star");
   
+  descText = "Breadth-First-Search is an uninformed algorithm that searches for the goal by checking every single node in the current layer before moving on to the next. BFS does not use heuristics.";
+  algSelector.addButton("Breadth-F.S.", descText, "breadthFS");
+  
+  descText = "Dijkstra's Algorithm can be made using the exact same code as the A* algorithm but unlike A* it is not an informed algorithm. It does not use heuristics and instead gives every direction a value of 1.";
+  algSelector.addButton("Dijkstra", descText, "dijkstra");
+  
+  // Heuristic Selector
   heurSelector = new Selector("HEURISTICS", width - 180, 350, 160, 140); // Title, x, y, w, h
   
-  descText = "Manhattan distance measures grid distance in terms of only horizontal and vertical movement. Each step in any direction is given a distance of 1. If Allow Diagonal is selected it will use Octile instead.";
+  descText = "Manhattan distance measures grid distance in terms of only horizontal and vertical movement. Each step in the cardinal directions is given a distance of 1. If Allow Diagonal is selected it will use Octile instead.";
   heurSelector.addButton("Manhattan", descText, "manhattan");
   
   descText = "Octile distance is the standard for measuring distance on a grid that allows for diagonal movement. A horizontal or vertical step is given a distance of 1 and a diagonal step is given the distance √2 (~1.41).";
@@ -82,12 +91,12 @@ void setup(){
   
   descText = "Runs the algorithm with the selected settings.";
   startButton = new rectButton("START", descText, 25, width - 150, 715, 100, 40); //  Start
-  descText = "Stops running and sets grid to how it was originally.";
+  descText = "Stops running and sets grid to how it was upon startup.";
   resetButton = new rectButton("RESET", descText, 20, width - 190, 670, 80, 30); // Reset
   descText = "Stops running and removes the path created by the algorithm.";
   clearButton = new rectButton("CLEAR", descText, 20, width - 90, 670, 80, 30); // Clear
   
-  descText = "Adjusts the speed of which the algorithm runs. Ranges from 5 - 100 fps";
+  descText = "Adjusts the speed of which the algorithm runs. Ranges from 5 - 100 FPS";
   speedSlider = new Slider("Speed", descText, 5, 100, width - 170, 590, 140, 35); // title, min, max, x, y, w, h
 }
 
@@ -206,8 +215,8 @@ void handleEvents(){
     }
   
     // Selection menus/Buttons - - - -
-    algSelector.handleEvents();
-    heurSelector.handleEvents();
+    algSelector.handlePress();
+    heurSelector.handlePress();
     
     if (diagonalButton.is_pressed()){
       if (diagonalButton.isSelected) diagonalButton.isSelected = false;
@@ -244,17 +253,23 @@ void handleEvents(){
     clear_path();
   }
   
+  
   // speedSlider
   speedSlider.handleEvents();
   
+  // Selector panels
+  algSelector.handleHover();
+  heurSelector.handleHover();
+  
   // Change cursor and description for hovered buttons
   cursor = HAND;
-  if (algSelector.hoveredDesc != null){ descText = algSelector.hoveredDesc; } // Algorithm selector
-  else if(heurSelector.hoveredDesc != null){ descText = heurSelector.hoveredDesc; } // Heuristic selector
-  else if(diagonalButton.is_hovered()){ descText = diagonalButton.description; } // Diagonal button
-  else if(resetButton.is_hovered()){ descText = resetButton.description; } // Reset button
-  else if(clearButton.is_hovered()){ descText = clearButton.description; } // Clear Button
-  else if(speedSlider.is_hovered()) { descText = speedSlider.description; }
+  if (algSelector.hoveredDesc != null) { descText = algSelector.hoveredDesc; } // Algorithm selector
+  else if(heurSelector.hoveredDesc != null) { descText = heurSelector.hoveredDesc; } // Heuristic selector
+  else if(diagonalButton.is_hovered()) { descText = diagonalButton.description; } // Diagonal button
+  else if(resetButton.is_hovered()) { descText = resetButton.description; } // Reset button
+  else if(clearButton.is_hovered()) { descText = clearButton.description; } // Clear Button
+  else if(speedSlider.is_hovered()) { descText = speedSlider.description; } // Speed Slider
+  else if(startButton.is_hovered()) { descText = startButton.description; } // Start Button
   
   // Nothing hovered
   else{
