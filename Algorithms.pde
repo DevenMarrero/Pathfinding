@@ -1,4 +1,6 @@
 import java.util.PriorityQueue; // Priority queue so algorithms can run in O(1) time with automatic sorting
+import java.util.Queue; // Works as first in first out array
+import java.util.LinkedList;
 import java.util.Map; // HashMap for backtracking with key, value pairs
 
 class Algorithms{
@@ -20,9 +22,9 @@ class Algorithms{
   
   // Algorithm Vars - - -
   ArrayList<Node> path = new ArrayList<Node>(); // Path returned from algorithm
-  // Priority queue is faster than hash set and is sorted from least to greatest automatically
   // All nodes that have been found but not searched
-  private PriorityQueue<Node> openSet = new PriorityQueue();;
+  private PriorityQueue<Node> openSetPQueue = new PriorityQueue();   // Priority queue is faster than hash set and is sorted from least to greatest automatically
+  private Queue<Node> openSetQueue = new LinkedList<Node>();
   
   private HashMap<Node,Node> cameFrom  = new HashMap<Node,Node>();  // To keep track of path
   
@@ -68,14 +70,14 @@ class Algorithms{
     
     switch (options.algorithm){
       case ("a_star"):
-        return a_star(field, start, goal, options.canMoveDiagonal);
+        return a_star(field, start, goal);
+        
+      case ("breadthFS"):
+        return breadthFS(field, start, goal, options.canMoveDiagonal);
        
       case("dijkstra"):
         options.heuristic = "one";
-        return a_star(field, start, goal, options.canMoveDiagonal);
-       
-      case ("breadthFS"):
-        return breadthFS(field, start, goal, options.canMoveDiagonal);
+        return a_star(field, start, goal);
          
       default:
         throw new RuntimeException("Algorithm: " + options.algorithm + " does not exist!");
@@ -83,13 +85,13 @@ class Algorithms{
   }
 
   
-  // A Star / Dijkstra's - - -
-  int a_star(Node[][] field, Node start, Node goal, boolean canMoveDiagonal){
+  // A Star / Dijkstra's - - - -
+  int a_star(Node[][] field, Node start, Node goal){
     
     // Setup algorithm once
     if (!setupComplete){
-      openSet.clear();
-      openSet.add(start);
+      openSetPQueue.clear();
+      openSetPQueue.add(start);
       
       // To keep track of path
       cameFrom.clear();
@@ -99,9 +101,9 @@ class Algorithms{
       setupComplete = true;
     }
     
-    if (!openSet.isEmpty()){
+    if (!openSetPQueue.isEmpty()){
       // Get node with lowest fScore
-      Node current = openSet.peek();
+      Node current = openSetPQueue.peek();
       
       // Found goal
       if (current == goal){
@@ -113,9 +115,9 @@ class Algorithms{
         return 1;
       }
       
-      openSet.remove(current);
+      openSetPQueue.remove(current);
       
-      for (Node neighbor : current.get_neighbours(field, canMoveDiagonal)){
+      for (Node neighbor : current.get_neighbours(field, options.canMoveDiagonal)){
         // Current gScore + distance to neighbor (distance varies depending on heuristic)
         float tentative_gScore = current.g + heuristic(current, neighbor);
         
@@ -126,8 +128,8 @@ class Algorithms{
           neighbor.f = neighbor.g + heuristic(neighbor, goal);
           
           // Add neighbor to openSet if not already in
-          if (!openSet.contains(neighbor)){
-            openSet.add(neighbor);
+          if (!openSetPQueue.contains(neighbor)){
+            openSetPQueue.add(neighbor);
             neighbor.set_open();
           }
         }
@@ -144,11 +146,52 @@ class Algorithms{
     return -1;
   }
   
-  // Breadth-first Search
+  // Breadth-first Search - - - -
   int breadthFS(Node[][] field, Node start, Node goal, boolean canMoveDiagonal){
+    
+    if (!setupComplete){
+      openSetQueue.clear();
+      // Add start node to queue
+      openSetQueue.add(start);
+      
+      // To keep track of path
+      cameFrom.clear();
+      
+      setupComplete = true;
+    }
+    
+    if (!openSetQueue.isEmpty()){
+      Node current = openSetQueue.poll();
+      if (current != start){
+        current.set_closed();
+      }
+      
+      
+      if (current == goal){
+        println("Found");
+        reconstruct_path(cameFrom, current);
+        goal.set_finish();
+        start.set_start();
+        isRunning = false;
+        setupComplete = false;
+        return 1;
+      }
+      
+      for (Node neighbor : current.get_neighbours(field,options.canMoveDiagonal)){
+        // Skip if neighbor is already added
+        if (neighbor.is_open() || neighbor.is_closed() || neighbor.is_start()){
+          continue;
+        }
+        openSetQueue.add(neighbor);
+        neighbor.set_open();
+        cameFrom.put(neighbor, current);
+      }
+      return 0;
+    }
+    
     isRunning = false;
     setupComplete = false;
-    return 1;
+    return -1;
   }
   
 
