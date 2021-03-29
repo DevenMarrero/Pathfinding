@@ -6,7 +6,7 @@ class Node implements Comparable<Node>{
   // Colours
   color RED = color(255, 0, 0);          // Finish
   color GREEN = color(0, 225, 0);        // Start
-  color BLUE = color(0, 0, 255);         //
+  color YELLOW = color(255, 251, 122);   // Current
   color WHITE = color(255, 255, 255);    // Empty
   color PURPLE = color(234, 166, 247);   // Open
   color ORANGE = color(255, 165, 0);     // Path
@@ -48,6 +48,7 @@ class Node implements Comparable<Node>{
   void set_open() {colour = PURPLE;}
   void set_closed() {colour = TURQUOISE;}
   void set_path() {colour = ORANGE;}
+  void set_current() {colour = YELLOW;}
   
   // Get row/col
   int get_row(){
@@ -63,35 +64,28 @@ class Node implements Comparable<Node>{
   ArrayList<Node> get_neighbours(Node[][] field, boolean canMoveDiagonal){
     
     ArrayList<Node> neighbours = new ArrayList<Node>();
-    
-    // UP
+    // ↑
     if(row - 1 >= 0 && !field[row - 1][col].is_wall()){
       neighbours.add(field[row - 1][col]);
     }
-    // DOWN
+    // ↓
     if (row + 1 != field.length && !field[row + 1][col].is_wall()){
       neighbours.add(field[row + 1][col]);
     }
-    // LEFT
-    if (col - 1 >= 0 && !field[row][col - 1].is_wall()){
-      neighbours.add(field[row][col - 1]);
-    }
-    // RIGHT
+    // →
     if (col + 1 != field[row].length && !field[row][col + 1].is_wall()){
       neighbours.add(field[row][col + 1]);
     }
-    
+    // ←
+    if (col - 1 >= 0 && !field[row][col - 1].is_wall()){
+      neighbours.add(field[row][col - 1]);
+    }
+
+
+
     // Diagonals
     if (canMoveDiagonal){
-      // Top right
-      if (row - 1 >= 0 && col + 1 != field[row].length && !field[row - 1][col + 1].is_wall()){
-        // Not a corner
-        if (!(field[row - 1][col].is_wall() && field[row][col + 1].is_wall())){
-          neighbours.add(field[row - 1][col + 1]);
-        }
-      }
-      
-      // Top left
+      // ↖
       if (row - 1 >= 0 && col - 1 >= 0 && !field[row - 1][col - 1].is_wall()){
         // Not a corner
         if (!(field[row - 1][col].is_wall() && field[row][col - 1].is_wall())){
@@ -99,7 +93,15 @@ class Node implements Comparable<Node>{
         }
       }
       
-      // Bottom right
+      // ↗
+      if (row - 1 >= 0 && col + 1 != field[row].length && !field[row - 1][col + 1].is_wall()){
+        // Not a corner
+        if (!(field[row - 1][col].is_wall() && field[row][col + 1].is_wall())){
+          neighbours.add(field[row - 1][col + 1]);
+        }
+      }
+      
+      // ↘
       if (row + 1 != field.length && col + 1 != field[row].length && !field[row + 1][col + 1].is_wall()){
         // Not a corner
         if (!(field[row + 1][col].is_wall() && field[row][col + 1].is_wall())){
@@ -107,7 +109,7 @@ class Node implements Comparable<Node>{
         }
       }
       
-      // Bottom left
+      // ↙
       if (row + 1 != field.length && col - 1 >= 0 && !field[row + 1][col - 1].is_wall()){
         // Not a corner
         if (!(field[row + 1][col].is_wall() && field[row][col - 1].is_wall())){
