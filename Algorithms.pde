@@ -28,6 +28,8 @@ class Algorithms{
   
   private HashMap<Node,Node> cameFrom  = new HashMap<Node,Node>();  // To keep track of path
   
+  Node lastCurrent = new Node(0, 0);
+  
   // Constructor - - -
   Algorithms(){
     options = new Options();
@@ -65,19 +67,22 @@ class Algorithms{
   }
   
   // Algorithms - - - - -
-  int run(Node[][] field, Node start, Node goal){  
+  void run(Node[][] field, Node start, Node goal){  
     isRunning = true;
     
     switch (options.algorithm){
       case ("a_star"):
-        return a_star(field, start, goal);
+        a_star(field, start, goal);
+        break;
         
       case ("breadthFS"):
-        return breadthFS(field, start, goal, options.canMoveDiagonal);
+        breadthFS(field, start, goal);
+        break;
        
       case("dijkstra"):
         options.heuristic = "one";
-        return a_star(field, start, goal);
+        a_star(field, start, goal);
+        break;
          
       default:
         throw new RuntimeException("Algorithm: " + options.algorithm + " does not exist!");
@@ -86,7 +91,7 @@ class Algorithms{
 
   
   // A Star / Dijkstra's - - - -
-  int a_star(Node[][] field, Node start, Node goal){
+  void a_star(Node[][] field, Node start, Node goal){
     
     // Setup algorithm once
     if (!setupComplete){
@@ -100,7 +105,6 @@ class Algorithms{
       start.f = heuristic(start, goal);
       setupComplete = true;
     }
-    
     if (!openSetPQueue.isEmpty()){
       // Get node with lowest fScore
       Node current = openSetPQueue.peek();
@@ -112,7 +116,7 @@ class Algorithms{
         start.set_start();
         isRunning = false;
         setupComplete = false;
-        return 1;
+        return;
       }
       
       openSetPQueue.remove(current);
@@ -135,20 +139,27 @@ class Algorithms{
         }
       }
       if (current != start){
-        current.set_closed();
+
+        if (options.showCurrent){
+          current.set_current();
+          lastCurrent.set_closed();
+          lastCurrent = current;
+        }
+        else current.set_closed();
+          
+
       }
       // Algorithm is still searchiing
-      return 0;
+      return;
     }
     // Failed to find a path
     isRunning = false;
     setupComplete = false;
-    return -1;
   }
   
   // Breadth-first Search - - - -
-  int breadthFS(Node[][] field, Node start, Node goal, boolean canMoveDiagonal){
-    
+  void breadthFS(Node[][] field, Node start, Node goal){
+    // Run setup the first time
     if (!setupComplete){
       openSetQueue.clear();
       // Add start node to queue
@@ -160,38 +171,45 @@ class Algorithms{
       setupComplete = true;
     }
     
+    // If queue is not empty
     if (!openSetQueue.isEmpty()){
       Node current = openSetQueue.poll();
       if (current != start){
-        current.set_closed();
+        if (options.showCurrent){
+          current.set_current();
+          lastCurrent.set_closed();
+          lastCurrent = current;
+        }
+        else current.set_closed();
       }
       
-      
+      // Reached the end goal
       if (current == goal){
-        println("Found");
         reconstruct_path(cameFrom, current);
         goal.set_finish();
         start.set_start();
         isRunning = false;
         setupComplete = false;
-        return 1;
+        return;
       }
       
-      for (Node neighbor : current.get_neighbours(field,options.canMoveDiagonal)){
+      // For each neighbour of the current node
+      for (Node neighbour : current.get_neighbours(field,options.canMoveDiagonal)){
         // Skip if neighbor is already added
-        if (neighbor.is_open() || neighbor.is_closed() || neighbor.is_start()){
+        if (neighbour.is_open() || neighbour.is_closed() || neighbour.is_start()){
           continue;
         }
-        openSetQueue.add(neighbor);
-        neighbor.set_open();
-        cameFrom.put(neighbor, current);
+        // Add the neighbour to the queue
+        openSetQueue.add(neighbour);
+        neighbour.set_open();
+        cameFrom.put(neighbour, current);
       }
-      return 0;
+      // Still running
+      return;
     }
-    
+    // Could not find a path
     isRunning = false;
     setupComplete = false;
-    return -1;
   }
   
 
@@ -259,6 +277,7 @@ class Algorithms{
       private String algorithm;
       private String heuristic;
       boolean canMoveDiagonal;
+      boolean showCurrent;
       
       Options(){
         algorithm = "a_star";
