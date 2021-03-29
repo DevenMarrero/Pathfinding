@@ -5,7 +5,7 @@
 //  Description: Visualization tool for testing diferent pathfinding algorithms 
 //  Created by: Deven
 //  Created on: March 12th, 2021
-//  Last Updated: March 27th, 2021
+//  Last Updated: March 29th, 2021
 //  Known Limitations: 
 
 
@@ -13,16 +13,16 @@
 Algorithms algorithm;
 
 Node[][] grid;
-ArrayList<Node> walls = new ArrayList<Node>(); // Keep track of walls when clearing grid
+ArrayList<Node> walls; // Keep track of walls when clearing grid
 Node start;
 Node goal;
 
 // Drawing vars
 int nodeSize = 15;
-boolean dragStart = false;
-boolean dragFinish = false;
-boolean erasing  = false;
-boolean drawing = false;
+boolean dragStart;
+boolean dragFinish;
+boolean erasing;
+boolean drawing;
 int lastRow;
 int lastCol;
 int cursor; // Mouse cursor
@@ -31,6 +31,7 @@ int cursor; // Mouse cursor
 Selector algSelector;
 Selector heurSelector;
 ToggleButton diagonalButton; 
+ToggleButton showCurrentButton;
 
 rectButton startButton;
 rectButton resetButton;
@@ -42,24 +43,34 @@ String descText;
 
 
 void setup(){ 
+  // Setup grid
   clear_grid();
   // Place start and finish nodes
   grid[24][20].set_start();
   start = grid[24][20];
   grid[24][30].set_finish();
   goal = grid[24][30];
+  nodeSize = 15;
   
+  // Setup screen
   surface.setTitle("Pathfinding Visualizer");  
-  // Set size and locationof screen
   surface.setSize(nodeSize * grid.length + 200, nodeSize * grid[0].length + 100);
   surface.setLocation(displayWidth/2 - width/2, displayHeight/2 - height/2);
+  
+  // Setup vars
+  walls = new ArrayList<Node>();
+  dragStart = false;
+  dragFinish = false;
+  erasing  = false;
+  drawing = false;
+
   
   // create object that contains algorithms.
   algorithm = new Algorithms();
   
   // Create selection menus and add buttons to them
   // Algorithm Selector
-  algSelector = new Selector("ALGORITHMS", width - 180, 50, 160, 250); // Title, x, y, w, h
+  algSelector = new Selector("ALGORITHMS", width - 180, 50, 160, 200); // Title, x, y, w, h
   
   descText = "A* is one of the most popular pathfinding algorithms due to its speed and intelligence. A* uses heuristics to estimate the distance from the purple node it is checking to the goal and then moves to the closest one and repeats.";
   algSelector.addButton("A*", descText, "a_star");
@@ -71,7 +82,7 @@ void setup(){
   algSelector.addButton("Dijkstra", descText, "dijkstra");
   
   // Heuristic Selector
-  heurSelector = new Selector("HEURISTICS", width - 180, 350, 160, 140); // Title, x, y, w, h
+  heurSelector = new Selector("HEURISTICS", width - 180, 300, 160, 140); // Title, x, y, w, h
   
   descText = "Manhattan distance measures grid distance in terms of only horizontal and vertical movement. Each step in the cardinal directions is given a distance of 1. If Allow Diagonal is selected it will use Octile instead.";
   heurSelector.addButton("Manhattan", descText, "manhattan");
@@ -87,7 +98,10 @@ void setup(){
   
   // Create independent buttons
   descText = "If selected the algorithm can move diagonally, otherwise it will only move vertically and horizontally.";
-  diagonalButton = new ToggleButton("Allow Diagonal", descText, "diagonal", width - 160, 570); // Allow diagonal
+  diagonalButton = new ToggleButton("Allow Diagonal", descText, "diagonal", width - 160, 520); // Allow diagonal
+  
+  descText = "If selected the algorithm will show the curent node it is checking by setting it to yellow. This is only a visual change.";
+  showCurrentButton = new ToggleButton("Show Current", descText, "showCurrent", width - 160, 550);
   
   descText = "Runs the algorithm with the selected settings.";
   startButton = new rectButton("START", descText, 25, width - 150, 715, 100, 40); //  Start
@@ -97,7 +111,7 @@ void setup(){
   clearButton = new rectButton("CLEAR", descText, 20, width - 90, 670, 80, 30); // Clear
   
   descText = "Adjusts the speed of which the algorithm runs. Ranges from 5 - 100 FPS";
-  speedSlider = new Slider("Speed", descText, 5, 100, width - 170, 590, 140, 35); // title, min, max, x, y, w, h
+  speedSlider = new Slider("Speed", descText, 5, 100, width - 170, 570, 140, 35); // title, min, max, x, y, w, h
 }
 
 void draw(){
@@ -223,6 +237,11 @@ void handleEvents(){
       else if (!diagonalButton.isSelected) diagonalButton.isSelected = true;
     }
     
+    if (showCurrentButton.is_pressed()){
+      if (showCurrentButton.isSelected) showCurrentButton.isSelected = false;
+      else if (!showCurrentButton.isSelected) showCurrentButton.isSelected = true;
+    }
+    
     // Start Pressed
     if (startButton.is_pressed()){
       clear_path();
@@ -263,13 +282,14 @@ void handleEvents(){
   
   // Change cursor and description for hovered buttons
   cursor = HAND;
-  if (algSelector.hoveredDesc != null) { descText = algSelector.hoveredDesc; } // Algorithm selector
-  else if(heurSelector.hoveredDesc != null) { descText = heurSelector.hoveredDesc; } // Heuristic selector
-  else if(diagonalButton.is_hovered()) { descText = diagonalButton.description; } // Diagonal button
-  else if(resetButton.is_hovered()) { descText = resetButton.description; } // Reset button
-  else if(clearButton.is_hovered()) { descText = clearButton.description; } // Clear Button
-  else if(speedSlider.is_hovered()) { descText = speedSlider.description; } // Speed Slider
-  else if(startButton.is_hovered()) { descText = startButton.description; } // Start Button
+  if (algSelector.hoveredDesc != null) descText = algSelector.hoveredDesc; // Algorithm selector
+  else if(heurSelector.hoveredDesc != null) descText = heurSelector.hoveredDesc; // Heuristic selector
+  else if(diagonalButton.is_hovered()) descText = diagonalButton.description; // Diagonal button
+  else if (showCurrentButton.is_hovered()) descText = showCurrentButton.description; // ShowCurrent Button
+  else if(resetButton.is_hovered()) descText = resetButton.description; // Reset button
+  else if(clearButton.is_hovered()) descText = clearButton.description; // Clear Button
+  else if(speedSlider.is_hovered()) descText = speedSlider.description; // Speed Slider
+  else if(startButton.is_hovered()) descText = startButton.description; // Start Button
   
   // Nothing hovered
   else{
@@ -292,16 +312,14 @@ void update(){
   if(diagonalButton.isSelected) algorithm.options.canMoveDiagonal = true;
   else algorithm.options.canMoveDiagonal = false;
   
+  if (showCurrentButton.isSelected) algorithm.options.showCurrent = true;
+  else algorithm.options.showCurrent = false;
+  
   // Run alg if ready
   if (algorithm.isRunning){
     frameRate(speedSlider.value);
-    int result = algorithm.run(grid, start, goal); // -1 = fail, 0 = still running, 1 = found path
-    
-    if (result == -1){ // Alg Failed
-      
-    }
-    else if (result == 1){ // Alg complete
-    }
+    // Run algorithm
+    algorithm.run(grid, start, goal);
   }
 
 }
@@ -326,6 +344,7 @@ void render(){
   
   // Draw buttons
   diagonalButton.render();
+  showCurrentButton.render();
   startButton.render();
   resetButton.render();
   clearButton.render();
@@ -334,14 +353,16 @@ void render(){
   speedSlider.render();
   
   // Draw options box
+  // Title
   fill(0);
   textSize(20);
   textAlign(CENTER);
-  text("OPTIONS", width - 180 + 160 / 2, 540 - 10);
+  text("OPTIONS", width - 180 + 160 / 2, 480);
   
+  // Box
   noFill();
   strokeWeight(2);
-  rect(width - 180, 540, 160, 100);
+  rect(width - 180, 490, 160, 130);
   
   // Draw description
   textSize(18);
