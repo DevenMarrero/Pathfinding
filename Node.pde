@@ -6,7 +6,6 @@ class Node implements Comparable<Node>{
   // Colours
   color RED = color(255, 0, 0);          // Finish
   color GREEN = color(0, 225, 0);        // Start
-  color YELLOW = color(255, 251, 122);   // Current
   color WHITE = color(255, 255, 255);    // Empty
   color PURPLE = color(234, 166, 247);   // Open
   color ORANGE = color(255, 165, 0);     // Path
@@ -48,7 +47,6 @@ class Node implements Comparable<Node>{
   void set_open() {colour = PURPLE;}
   void set_closed() {colour = TURQUOISE;}
   void set_path() {colour = ORANGE;}
-  void set_current() {colour = YELLOW;}
   
   // Get row/col
   int get_row(){
