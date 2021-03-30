@@ -37,36 +37,7 @@ class Algorithms{
     pathReady = false;
   }
   
-  void reset(){
-    isRunning = false;
-    setupComplete = false;
-  }
-  
-  
-  void reconstruct_path(HashMap<Node,Node> cameFrom, Node current){
-    // Only needs to be called once, backtracks and reverses the order of the nodes in cameFrom
-    path.clear();
-    path.add(0, current);
-    while (cameFrom.containsKey(current)){
-      current = cameFrom.get(current);
-      path.add(path.size(), current); // Index 0 for start-finish, Index path.size for finish to start
-    }
-    // remove start and finish nodes
-    path.remove(path.size() - 1);
-    path.remove(0);
-    pathReady = true;
-  }
-  
-  void showPath(){
-    Node node = path.get(0);
-    node.set_path();
-    path.remove(0);
-    if (path.size() == 0){
-      pathReady = false;
-    }
-  }
-  
-  // Algorithms - - - - -
+  // Algorithms - - - - - - - - - - - - - - - - - - 
   void run(Node[][] field, Node start, Node goal){  
     isRunning = true;
     
@@ -160,6 +131,7 @@ class Algorithms{
     setupComplete = false;
   }
   
+  // Best-First-Search - - - - 
   void bestFS(Node[][] field, Node start, Node goal){
     if (!setupComplete){
       openSetPQueue.clear();
@@ -280,7 +252,7 @@ class Algorithms{
   }
   
 
-  // Heuristics - - - - -
+  // Heuristics - - - - - - - - - - - - - - - - - - - - -
   float heuristic(Node node, Node goal){
     // Function will return distance between nodes based on heuristic selected in options.heuristic
     
@@ -334,9 +306,39 @@ class Algorithms{
     float chebyshev(int dx, int dy){
       return max(dx, dy);
     }
+  
+  // Algorithm Utilities - - - - - - - - - - -
+  void reset(){
+    isRunning = false;
+    setupComplete = false;
+  }
+  
+  
+  void reconstruct_path(HashMap<Node,Node> cameFrom, Node current){
+    // Only needs to be called once, backtracks and reverses the order of the nodes in cameFrom
+    path.clear();
+    path.add(0, current);
+    while (cameFrom.containsKey(current)){
+      current = cameFrom.get(current);
+      path.add(path.size(), current); // Index 0 for start-finish, Index path.size for finish to start
+    }
+    // remove start and finish nodes
+    path.remove(path.size() - 1);
+    path.remove(0);
+    pathReady = true;
+  }
+  
+  void showPath(){
+    Node node = path.get(0);
+    node.set_path();
+    path.remove(0);
+    if (path.size() == 0){
+      pathReady = false;
+    }
+  }
     
     
-    // Class for algorithm settings - - - -
+    // Class for algorithm settings - - - - - - - - - 
     class Options{
       /* 
       Groups all algorithm settings in one place for clean and easy access
