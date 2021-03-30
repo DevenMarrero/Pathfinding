@@ -74,7 +74,10 @@ class Algorithms{
       case ("a_star"):
         a_star(field, start, goal);
         break;
-        
+      case ("bestFS"):
+        bestFS(field, start, goal);
+        break;
+      
       case ("breadthFS"):
         breadthFS(field, start, goal);
         break;
@@ -153,6 +156,70 @@ class Algorithms{
       return;
     }
     // Failed to find a path
+    isRunning = false;
+    setupComplete = false;
+  }
+  
+  void bestFS(Node[][] field, Node start, Node goal){
+    if (!setupComplete){
+      openSetPQueue.clear();
+      
+      // Set start distance to end and add to PriorityQueue
+      start.f = heuristic(start, goal);
+      openSetPQueue.add(start);
+      
+      // To keep track of path
+      cameFrom.clear();
+      
+      setupComplete = true;
+    }
+    
+    // If Nodes left to search
+    if (!openSetPQueue.isEmpty()){
+      // Get node with lowest f score
+      Node current = openSetPQueue.poll();
+      
+      // For showing current
+      if (current != start){
+        if (options.showCurrent){
+          current.set_path();
+          lastCurrent.set_closed();
+          lastCurrent = current;
+        }
+        else current.set_closed();
+      }
+      
+      // If found goal
+      if (current == goal){
+        reconstruct_path(cameFrom, current);
+        start.set_start();
+        goal.set_finish();
+        isRunning = false;
+        setupComplete = false;
+        return;
+      }
+      
+      // For each neighbour of current node
+      for (Node neighbour : current.get_neighbours(field,options.canMoveDiagonal)){
+        // If neighbour has been checked already.
+        if(neighbour.is_open() || neighbour.is_closed() || neighbour.is_start()){
+          continue;
+        }
+          
+        neighbour.set_open();
+        
+        // Add neighbour to PriorityQueue
+        neighbour.f = heuristic(neighbour, goal);
+        openSetPQueue.add(neighbour);
+        
+        // Set current node as neighbour parent
+        cameFrom.put(neighbour, current);
+        
+      }
+      // Algorithm still Running
+      return;
+    }
+    // Could not find a path
     isRunning = false;
     setupComplete = false;
   }
