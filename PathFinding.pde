@@ -5,12 +5,12 @@
 //  Description: Visualization tool for testing diferent pathfinding algorithms 
 //  Created by: Deven
 //  Created on: March 12th, 2021
-//  Last Updated: March 29th, 2021
+//  Last Updated: March 30th, 2021
 //  Known Limitations: 
 
 
 // Algorithm Vars
-Algorithms algorithm;
+Algorithms algorithm; 
 
 Node[][] grid;
 ArrayList<Node> walls; // Keep track of walls when clearing grid
@@ -53,9 +53,9 @@ void setup(){
   nodeSize = 15;
   
   // Setup screen
-  surface.setTitle("Pathfinding Visualizer");  
-  surface.setSize(nodeSize * grid.length + 200, nodeSize * grid[0].length + 100);
-  surface.setLocation(displayWidth/2 - width/2, displayHeight/2 - height/2);
+  surface.setTitle("Pathfinding Visualizer"); // Title
+  surface.setSize(nodeSize * grid.length + 200, nodeSize * grid[0].length + 100); // ScreenSize
+  surface.setLocation(displayWidth/2 - width/2, displayHeight/2 - height/2); // Center Screen
   
   // Setup vars
   walls = new ArrayList<Node>();
@@ -72,11 +72,14 @@ void setup(){
   // Algorithm Selector
   algSelector = new Selector("ALGORITHMS", width - 180, 50, 160, 200); // Title, x, y, w, h
   
-  descText = "A* is one of the most popular pathfinding algorithms due to its speed and intelligence. A* uses heuristics to estimate the distance from the purple node it is checking to the goal and then moves to the closest one and repeats.";
-  algSelector.addButton("A*", descText, "a_star");
+  descText = "A* is a popular pathfinding algorithms due to its speed and intelligence. It is an informed algorithm and uses heuristics to estimate the distance from the current node it is checking to the goal as well as the start and then moves to the lowest one.";
+  algSelector.addButton("A*", descText, "a_star"); // Title, description, value
+  
+  descText = "Best-First-Search is an informed algorithm that uses heuristics to determine the shortest path. It is less complex than A* as decisions are based only on forward distance. This can lead to Best F.S checking less and being faster in some scenarios.";
+  algSelector.addButton("Best F.S.",descText, "bestFS");
   
   descText = "Breadth-First-Search is an uninformed algorithm that searches for the goal by checking every single node in the current layer before moving on to the next. BFS does not use heuristics.";
-  algSelector.addButton("Breadth-F.S.", descText, "breadthFS");
+  algSelector.addButton("Breadth F.S.", descText, "breadthFS");
   
   descText = "Dijkstra's Algorithm can be made using the exact same code as the A* algorithm but unlike A* it is not an informed algorithm. It does not use heuristics and instead gives every direction a value of 1.";
   algSelector.addButton("Dijkstra", descText, "dijkstra");
@@ -100,7 +103,7 @@ void setup(){
   descText = "If selected the algorithm can move diagonally, otherwise it will only move vertically and horizontally.";
   diagonalButton = new ToggleButton("Allow Diagonal", descText, "diagonal", width - 160, 520); // Allow diagonal
   
-  descText = "If selected the algorithm will show the curent node it is checking by setting it to yellow. This is only a visual change.";
+  descText = "If selected the algorithm will show the curent node it is searching by setting it to orange. This is only a visual change.";
   showCurrentButton = new ToggleButton("Show Current", descText, "showCurrent", width - 160, 550);
   
   descText = "Runs the algorithm with the selected settings.";
@@ -293,7 +296,7 @@ void handleEvents(){
   
   // Nothing hovered
   else{
-  descText = "Use the mouse to drag the green and red start/finish nodes around the grid, click and drag on the grid to draw and erase obstacles. Choose an algorithm from the panel on the right and press start." ;
+  descText = "Use the mouse to drag the green and red start/finish nodes around the grid, click and drag on the grid to draw and erase obstacles. Choose an algorithm from the panel on the right and press start to see it running." ;
   cursor = ARROW;
   }
   // Change cursor here to avoid flickering
@@ -317,6 +320,7 @@ void update(){
   
   // Run alg if ready
   if (algorithm.isRunning){
+    // Adjust framerate to slider value
     frameRate(speedSlider.value);
     // Run algorithm
     algorithm.run(grid, start, goal);
