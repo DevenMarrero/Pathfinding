@@ -141,7 +141,7 @@ class Algorithms{
       if (current != start){
 
         if (options.showCurrent){
-          current.set_current();
+          current.set_path();
           lastCurrent.set_closed();
           lastCurrent = current;
         }
@@ -176,7 +176,7 @@ class Algorithms{
       Node current = openSetQueue.poll();
       if (current != start){
         if (options.showCurrent){
-          current.set_current();
+          current.set_path();
           lastCurrent.set_closed();
           lastCurrent = current;
         }
