@@ -14,7 +14,6 @@ class Node implements Comparable<Node>{
   
   float f; // g + h
   float g; // Distance travelled so far
-  float h; // Distance estimated to finish
   
   private color colour;
   private int row;
@@ -27,7 +26,6 @@ class Node implements Comparable<Node>{
     this.col = col;
     f = Float.POSITIVE_INFINITY;
     g = Float.POSITIVE_INFINITY;
-    h = 0;
   }
 
   // Get state
