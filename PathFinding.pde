@@ -5,9 +5,10 @@
 //  Description: Visualization tool for testing diferent pathfinding algorithms 
 //  Created by: Deven
 //  Created on: March 12th, 2021
-//  Last Updated: March 30th, 2021
+//  Last Updated: March 31th, 2021
 //  Known Limitations: 
 
+import java.util.ArrayDeque;
 
 // Algorithm Vars
 Algorithms algorithm; 
@@ -376,6 +377,60 @@ void render(){
   
 }
 
+boolean mazeSetup = false;
+ArrayDeque<Node> nodeStack = new ArrayDeque();
+void generate_maze(){
+  
+  if (!mazeSetup){
+    
+    // Make entire grid walls
+    for (int r = 0; r < grid.length; r++){
+      for (int c = 0; c < grid[r].length; c++){
+        grid[r][c].set_wall();
+      }
+    }
+    
+    // nodes to explore
+    nodeStack.clear();
+    
+    // Start at top left
+    grid[0][0].set_empty();
+    nodeStack.push(grid[0][0]);
+    
+    mazeSetup = true;
+  }
+  
+  // While nodes in stack
+  if (!nodeStack.isEmpty()){
+    // Get cell at top of the stack
+    Node node = nodeStack.pop();
+    ArrayList<Node> neighbours = node.get_maze_neighbours(grid);
+    
+    // If node has neighbours 
+    while (!neighbours.isEmpty()){
+      
+      nodeStack.push(node);
+      
+      int randIndex = int(random(neighbours.size()));
+      Node neighbour = neighbours.get(randIndex);
+      
+      neighbour.set_empty();
+      
+      connect_nodes(node, neighbour);
+      
+      nodeStack.push(neighbour);
+      
+    } 
+  }
+  //mazeSetup = false;
+}
+
+void connect_nodes(Node node1, Node node2){
+  int rowDiff = (node1.row - node2.row) / -2;
+  int colDiff = (node1.col - node2.col) / -2; 
+  grid[node1.row + rowDiff][node1.col + colDiff].set_empty();
+}
+
 
 // Clears the entire grid - - -
 void clear_grid(){
@@ -416,5 +471,11 @@ void clear_path(){
   // Re-add wall nodes
   for (Node wall : walls){
     grid[wall.get_row()][wall.get_col()].set_wall();
+  }
+}
+
+void keyPressed(){
+  if (key == ' '){
+    generate_maze();
   }
 }
