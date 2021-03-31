@@ -117,6 +117,30 @@ class Node implements Comparable<Node>{
     return neighbours;
   }
   
+  // Returns all neighbouring nodes that have a space in between for maze wall
+  ArrayList<Node> get_maze_neighbours(Node[][] field){  
+    
+    ArrayList<Node> neighbours = new ArrayList<Node>();
+    // ↑
+    if(row - 2 >= 0 && field[row - 2][col].is_wall()){
+      neighbours.add(field[row - 2][col]);
+    }
+    // ↓
+    if (row + 2 < field.length && field[row + 2][col].is_wall()){
+      neighbours.add(field[row + 2][col]);
+    }
+    // →
+    if (col + 2 < field[row].length && field[row][col+ 2].is_wall()){
+      neighbours.add(field[row][col + 2]);
+    }
+    // ←
+    if (col - 2 >= 0 && field[row][col - 2].is_wall()){
+      neighbours.add(field[row][col - 2]);
+    }
+    
+    return neighbours;
+  }
+  
   // Compare two nodes, returns lowest f-Score. Used so PriorityQueue can sort nodes - - -
   @Override
   int compareTo(Node node){
