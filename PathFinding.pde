@@ -32,6 +32,8 @@ int cursor; // Mouse cursor
 boolean mazeSetup = false;
 boolean mazeRunning = false;
 ArrayDeque<Node> nodeStack = new ArrayDeque();
+Node lastNode = new Node(0, 0);
+boolean mazeShowCurrent;
 
 // Menu vars
 Selector algSelector;
@@ -39,6 +41,7 @@ Selector heurSelector;
 ToggleButton diagonalButton; 
 ToggleButton showCurrentButton;
 
+rectButton mazeButton;
 rectButton startButton;
 rectButton resetButton;
 rectButton clearButton;
@@ -76,7 +79,7 @@ void setup(){
   
   // Create selection menus and add buttons to them
   // Algorithm Selector
-  algSelector = new Selector("ALGORITHMS", width - 180, 50, 160, 200); // Title, x, y, w, h
+  algSelector = new Selector("ALGORITHMS", width - 180, 50, 160, 140); // Title, x, y, w, h
   
   descText = "A* is a popular pathfinding algorithms due to its speed and intelligence. It is an informed algorithm and uses heuristics to estimate the distance from the current node it is checking to the goal as well as the start and then moves to the lowest one.";
   algSelector.addButton("A*", descText, "a_star"); // Title, description, value
@@ -91,7 +94,7 @@ void setup(){
   algSelector.addButton("Dijkstra", descText, "dijkstra");
   
   // Heuristic Selector
-  heurSelector = new Selector("HEURISTICS", width - 180, 300, 160, 140); // Title, x, y, w, h
+  heurSelector = new Selector("HEURISTICS", width - 180, 250, 160, 140); // Title, x, y, w, h
   
   descText = "Manhattan distance measures grid distance in terms of only horizontal and vertical movement. Each step in the cardinal directions is given a distance of 1. If Allow Diagonal is selected it will use Octile instead.";
   heurSelector.addButton("Manhattan", descText, "manhattan");
@@ -106,21 +109,23 @@ void setup(){
   heurSelector.addButton("Chebyshev", descText, "chebyshev");
   
   // Create independent buttons
-  descText = "If selected the algorithm can move diagonally, otherwise it will only move vertically and horizontally.";
-  diagonalButton = new ToggleButton("Allow Diagonal", descText, "diagonal", width - 160, 520); // Allow diagonal
+  descText = "If selected, the search algorithms can move diagonally, otherwise they will only move vertically and horizontally.";
+  diagonalButton = new ToggleButton("Allow Diagonal", descText, "diagonal", width - 160, 480); // Allow diagonal
   
-  descText = "If selected the algorithm will show the curent node it is searching by setting it to orange. This is only a visual change.";
-  showCurrentButton = new ToggleButton("Show Current", descText, "showCurrent", width - 160, 550);
+  descText = "If selected, the search and maze algorithms will show the curent node they are working on by setting it to orange. This is only a visual change.";
+  showCurrentButton = new ToggleButton("Show Current", descText, "showCurrent", width - 160, 510); // Current
   
-  descText = "Runs the algorithm with the selected settings.";
-  startButton = new rectButton("START", descText, 25, width - 150, 715, 100, 40); //  Start
+  descText = "Generates a maze using a randomized depth-first-search algorithm. The algorithm randomly changes directions until it hits a dead end then backtracks until it finds another place to branch off.";
+  mazeButton = new rectButton("GENERATE MAZE", descText, 20, width - 190, 615, 180, 35);
   descText = "Stops running and sets grid to how it was upon startup.";
-  resetButton = new rectButton("RESET", descText, 20, width - 190, 670, 80, 30); // Reset
+  resetButton = new rectButton("RESET", descText, 20, width - 190, 665, 80, 30); // Reset
   descText = "Stops running and removes the path created by the algorithm.";
-  clearButton = new rectButton("CLEAR", descText, 20, width - 90, 670, 80, 30); // Clear
+  clearButton = new rectButton("CLEAR", descText, 20, width - 90, 665, 80, 30); // Clear
+  descText = "Runs the algorithm with the selected settings.";
+  startButton = new rectButton("START", descText, 25, width - 150, 710, 100, 40); //  Start
   
-  descText = "Adjusts the speed of which the algorithm runs. Ranges from 5 - 100 FPS";
-  speedSlider = new Slider("Speed", descText, 5, 100, width - 170, 570, 140, 35); // title, min, max, x, y, w, h
+  descText = "Adjusts the speed of which the algorithms will run. Ranges from 5 - 100 FPS";
+  speedSlider = new Slider("Speed", descText, 5, 100, width - 170, 530, 140, 35); // title, min, max, x, y, w, h
 }
 
 void draw(){
@@ -133,7 +138,7 @@ void draw(){
 // Handles input from user - - - - - - - - - - - - - - -
 void handleEvents(){
   // Alg is not running
-  if (!algorithm.isRunning){
+  if (!algorithm.isRunning && !mazeRunning){
     frameRate(200);
     int row = mouseY / nodeSize;
     int col = mouseX / nodeSize;
@@ -251,6 +256,11 @@ void handleEvents(){
       else if (!showCurrentButton.isSelected) showCurrentButton.isSelected = true;
     }
     
+    // Maze Pressed
+    if (mazeButton.is_pressed()){
+      mazeRunning = true;
+    }
+    
     // Start Pressed
     if (startButton.is_pressed()){
       clear_path();
@@ -267,7 +277,11 @@ void handleEvents(){
   
   // Reset Button
   if (resetButton.is_pressed()){
+    // Reset maze
+    mazeRunning = false;
+    mazeSetup = false;
     algorithm.reset();
+    // Reset grid
     clear_grid();
     grid[24][20].set_start();
     start = grid[24][20];
@@ -280,7 +294,6 @@ void handleEvents(){
     algorithm.reset();
     clear_path();
   }
-  
   
   // speedSlider
   speedSlider.handleEvents();
@@ -295,6 +308,7 @@ void handleEvents(){
   else if(heurSelector.hoveredDesc != null) descText = heurSelector.hoveredDesc; // Heuristic selector
   else if(diagonalButton.is_hovered()) descText = diagonalButton.description; // Diagonal button
   else if (showCurrentButton.is_hovered()) descText = showCurrentButton.description; // ShowCurrent Button
+  else if (mazeButton.is_hovered()) descText = mazeButton.description; // mazeButton
   else if(resetButton.is_hovered()) descText = resetButton.description; // Reset button
   else if(clearButton.is_hovered()) descText = clearButton.description; // Clear Button
   else if(speedSlider.is_hovered()) descText = speedSlider.description; // Speed Slider
@@ -302,8 +316,8 @@ void handleEvents(){
   
   // Nothing hovered
   else{
-  descText = "Use the mouse to drag the green and red start/finish nodes around the grid, click and drag on the grid to draw and erase obstacles. Choose an algorithm from the panel on the right and press start to see it running." ;
-  cursor = ARROW;
+    descText = "Use the mouse to drag the green and red start/finish nodes around the grid, click and drag on the grid to draw and erase obstacles. Choose an algorithm from the panel on the right and press start to see it running." ;
+    cursor = ARROW;
   }
   // Change cursor here to avoid flickering
   cursor(cursor);
@@ -321,8 +335,14 @@ void update(){
   if(diagonalButton.isSelected) algorithm.options.canMoveDiagonal = true;
   else algorithm.options.canMoveDiagonal = false;
   
-  if (showCurrentButton.isSelected) algorithm.options.showCurrent = true;
-  else algorithm.options.showCurrent = false;
+  if (showCurrentButton.isSelected) {
+    algorithm.options.showCurrent = true; 
+    mazeShowCurrent = true;
+  }
+  else {
+    algorithm.options.showCurrent = false;
+    mazeShowCurrent = false;
+  }
   
   // Run alg if ready
   if (algorithm.isRunning){
@@ -360,6 +380,7 @@ void render(){
   // Draw buttons
   diagonalButton.render();
   showCurrentButton.render();
+  mazeButton.render();
   startButton.render();
   resetButton.render();
   clearButton.render();
@@ -372,12 +393,12 @@ void render(){
   fill(0);
   textSize(20);
   textAlign(CENTER);
-  text("OPTIONS", width - 180 + 160 / 2, 480);
+  text("OPTIONS", width - 100, 440);
   
   // Box
   noFill();
   strokeWeight(2);
-  rect(width - 180, 490, 160, 130);
+  rect(width - 180, 450, 160, 130);
   
   // Draw description
   textSize(18);
@@ -412,6 +433,14 @@ void generate_maze(){
   if (!nodeStack.isEmpty()){
     // Get cell at top of the stack
     Node node = nodeStack.pop();
+    
+    if (mazeShowCurrent){
+      node.set_path();
+      lastNode.set_empty();
+      lastNode = node;
+    }
+    else node.set_empty();
+    
     ArrayList<Node> neighbours = node.get_maze_neighbours(grid);
     
     // If node has neighbours 
@@ -490,11 +519,5 @@ void clear_path(){
   // Re-add wall nodes
   for (Node wall : walls){
     grid[wall.get_row()][wall.get_col()].set_wall();
-  }
-}
-
-void keyPressed(){
-  if (key == ' '){
-    mazeRunning = true;
   }
 }
