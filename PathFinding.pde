@@ -28,6 +28,11 @@ int lastRow;
 int lastCol;
 int cursor; // Mouse cursor
 
+// Maze Vars
+boolean mazeSetup = false;
+boolean mazeRunning = false;
+ArrayDeque<Node> nodeStack = new ArrayDeque();
+
 // Menu vars
 Selector algSelector;
 Selector heurSelector;
@@ -326,6 +331,11 @@ void update(){
     // Run algorithm
     algorithm.run(grid, start, goal);
   }
+  
+  else if (mazeRunning){
+    frameRate(speedSlider.value);
+    generate_maze();
+  }
 
 }
 
@@ -377,10 +387,8 @@ void render(){
   
 }
 
-boolean mazeSetup = false;
-ArrayDeque<Node> nodeStack = new ArrayDeque();
 void generate_maze(){
-  
+  // First run
   if (!mazeSetup){
     
     // Make entire grid walls
@@ -407,22 +415,33 @@ void generate_maze(){
     ArrayList<Node> neighbours = node.get_maze_neighbours(grid);
     
     // If node has neighbours 
-    while (!neighbours.isEmpty()){
-      
+    if (!neighbours.isEmpty()){
+      // Add node back to stack
       nodeStack.push(node);
       
+      // Pick random neighbour
       int randIndex = int(random(neighbours.size()));
       Node neighbour = neighbours.get(randIndex);
       
+      // Mark neighbour as visited
       neighbour.set_empty();
-      
+      // Connect neighbour to current node
       connect_nodes(node, neighbour);
-      
+      // Add neighbour to stack
       nodeStack.push(neighbour);
-      
     } 
   }
-  //mazeSetup = false;
+  else{
+  // Maze Finished
+    mazeSetup = false;
+    mazeRunning = false;
+    
+    // Add start and finish nodes
+    grid[0][0].set_start();
+    start = grid[0][0];
+    grid[48][48].set_finish();
+    goal = grid[48][48];
+  }
 }
 
 void connect_nodes(Node node1, Node node2){
@@ -476,6 +495,6 @@ void clear_path(){
 
 void keyPressed(){
   if (key == ' '){
-    generate_maze();
+    mazeRunning = true;
   }
 }
