@@ -5,7 +5,7 @@
 //  Description: Visualization tool for testing diferent pathfinding algorithms 
 //  Created by: Deven
 //  Created on: March 12th, 2021
-//  Last Updated: March 31th, 2021
+//  Last Updated: April 4th, 2021
 //  Known Limitations: 
 
 import java.util.ArrayDeque;
@@ -292,7 +292,9 @@ void handleEvents(){
   // Clear button
   if (clearButton.is_pressed()){
     algorithm.reset();
-    clear_path();
+    if (!mazeRunning){
+      clear_path();
+    }
   }
   
   // speedSlider
@@ -316,7 +318,7 @@ void handleEvents(){
   
   // Nothing hovered
   else{
-    descText = "Use the mouse to drag the green and red start/finish nodes around the grid, click and drag on the grid to draw and erase obstacles. Choose an algorithm from the panel on the right and press start to see it running." ;
+    descText = "Use the mouse to drag the green and red start/finish nodes around the grid, click and drag on the grid to draw and erase obstacles. Choose an algorithm and settings from the panels on the right and press start to see it running." ;
     cursor = ARROW;
   }
   // Change cursor here to avoid flickering
