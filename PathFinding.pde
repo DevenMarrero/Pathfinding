@@ -115,7 +115,7 @@ void setup(){
   descText = "If selected, the search and maze algorithms will show the curent node they are working on by setting it to orange. This is only a visual change.";
   showCurrentButton = new ToggleButton("Show Current", descText, "showCurrent", width - 160, 510); // Current
   
-  descText = "Generates a maze using a randomized depth-first-search algorithm. The algorithm randomly changes directions until it hits a dead end then backtracks until it finds another place to branch off.";
+  descText = "Generates a maze using a randomized depth-first-search algorithm. The algorithm randomly changes directions until it hits a dead end and then backtracks until it finds another place to branch off.";
   mazeButton = new rectButton("GENERATE MAZE", descText, 20, width - 190, 615, 180, 35);
   descText = "Stops running and sets grid to how it was upon startup.";
   resetButton = new rectButton("RESET", descText, 20, width - 190, 665, 80, 30); // Reset
