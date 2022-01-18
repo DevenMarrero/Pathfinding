@@ -1,5 +1,5 @@
 # Pathfinding
-Pathfinding visualization tool made in Processing3 with Java. High School major Java project
+Pathfinding visualization tool made in Processing3 with Java. High School major Java project. The following is a write-up handed in with the assignment
 
 For my major Java project, I wanted the core of my program to be centered around being a tool that shows how different algorithms solve similar problems. When it came to deciding 
 what type of algorithms I wanted to demonstrate I originally landed on sorting, after some research I found that I was more interested in pathfinding and maze generation 
