@@ -1,4 +1,6 @@
 # Pathfinding
+https://user-images.githubusercontent.com/70239160/155470864-bf475adc-34a5-4776-9a72-1e5154d53dad.mp4
+
 Pathfinding visualization tool made in Processing3 with Java. High School major Java project. The following is a write-up handed in with the assignment
 
 For my major Java project, I wanted the core of my program to be centered around being a tool that shows how different algorithms solve similar problems. When it came to deciding 
